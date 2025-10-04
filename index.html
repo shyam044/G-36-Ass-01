@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Token-Based Calculator API</title>
+  <!-- Bootstrap CDN -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f4f7fa;
+      color: #333;
+    }
+    .main-heading {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+      margin-bottom: 40px;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .main-heading h1 {
+      font-weight: 700;
+      font-size: 42px;
+    }
+    .card-prob {
+      background-color: white;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin: 0 auto;
+      max-width: 1000px;
+    }
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #0072ff;
+      margin-top: 30px;
+    }
+    .icon {
+      color: #00c6ff;
+      margin-right: 10px;
+    }
+    pre {
+      background: #f0f8ff;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      overflow-x: auto;
+    }
+    .note-box {
+      background: #fff5e6;
+      border-left: 5px solid #ff9500;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .footer {
+      text-align: center;
+      margin: 60px 0 20px;
+      color: #aaa;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1000px;
+      margin: 40px auto 20px;
+      padding: 0 20px;
+    }
+    .btn-custom {
+      width: 120px;
+      font-weight: 600;
+      border-radius: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-heading">
+  <h1><i class="fas fa-key"></i> Token-Based Calculator API</h1>
+</div>
+
+<div class="card card-prob">
+
+  <h3 class="section-title"><i class="fas fa-tasks icon"></i>Assignment</h3>
+  <p>Develop a basic calculator API endpoint that performs arithmetic operations. Access to this endpoint must be restricted via user authorization. Instead of relying on traditional username and password authentication, implement token-based authorization to enhance security and scalability.</p>
+
+  <h3 class="section-title"><i class="fas fa-code icon"></i>Python Code</h3>
+  <pre><code>from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
+import jwt
+import time
+from jwt import ExpiredSignatureError, InvalidTokenError
+
+app = FastAPI()
+
+SECRET_KEY = "SUREProED"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_SECONDS = 60 * 15  # 15 minutes
+
+auth_scheme = HTTPBearer()
+
+def create_token(username: str) -> str:
+    payload = {
+        "sub": username,
+        "exp": int(time.time()) + ACCESS_TOKEN_EXPIRE_SECONDS
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def verify_token(token: str) -> str:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    username = payload.get("sub")
+    if not username:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+    return username
+
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    username = form_data.username
+
+    if username != "Bhargav":
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_token(username)
+    return {"access_token": token, "token_type": "bearer"}
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(auth_scheme)) -> str:
+    token = credentials.credentials
+    return verify_token(token)
+
+class Calcu(BaseModel):
+    a: float
+    b: float
+    operation: str
+
+@app.post("/calculate")
+def calculate(req: Calcu, user: str = Depends(get_current_user)):
+    op = req.operation.lower()
+
+    if op == "add":
+        result = req.a + req.b
+    elif op == "sub":
+        result = req.a - req.b
+    elif op == "mul":
+        result = req.a * req.b
+    elif op == "div":
+        if req.b == 0:
+            raise HTTPException(status_code=400, detail="Division by zero")
+        result = req.a / req.b
+    else:
+        raise HTTPException(status_code=400, detail="Invalid operation")
+
+    return {"user": user, "result": result}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+</code></pre>
+
+  <h3 class="section-title"><i class="fas fa-cogs icon"></i>Sample Output</h3>
+  <pre><code>POST /login
+form data: username=Bhargav, password=any
+→ {"access_token": "...", "token_type": "bearer"}
+
+POST /calculate
+Headers: Authorization: Bearer &lt;token&gt;
+Body: { "a": 10, "b": 5, "operation": "add" }
+→ {"user": "Bhargav", "result": 15.0 }</code></pre>
+
+  <h3 class="section-title"><i class="fas fa-info-circle icon"></i>Explanation</h3>
+  <ul>
+    <li><strong>JWT Token:</strong> Short-lived tokens (15 mins) are generated after login.</li>
+    <li><strong>OAuth2PasswordRequestForm:</strong> Simulates a form-based login with username/password.</li>
+    <li><strong>HTTPBearer:</strong> Used to extract and validate token from the request header.</li>
+    <li><strong>/calculate:</strong> Only accessible with valid token. Supports add, sub, mul, div operations.</li>
+    <li><strong>verify_token():</strong> Validates JWT signature and expiration.</li>
+  </ul>
+
+  <div class="note-box">
+    <h5><i class="fas fa-lock icon"></i>Why Token-Based Authentication?</h5>
+    <ul>
+      <li>🔐 More secure than keeping credentials in every request.</li>
+      <li>🧩 Stateless: No session data stored on server.</li>
+      <li>⏱️ Expirable: Tokens can expire and be refreshed securely.</li>
+      <li>🌐 Scalable: Easy to use across multiple APIs or microservices.</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- Navigation Buttons -->
+<div class="nav-buttons">
+  <a href="https://shyam044.github.io/bayes-theorem/" class="btn btn-danger btn-custom">
+    <i class="fas fa-arrow-left"></i> Prev
+  </a>
+  <a href="#" class="btn btn-primary btn-custom">
+    Next <i class="fas fa-arrow-right"></i>
+  </a>
+</div>
+
+<div class="footer">
+  &copy; 2025 API Security Assignment • Designed with ❤️
+</div>
+
+</body>
+</html>
