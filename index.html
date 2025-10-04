@@ -4,12 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Token-Based Calculator API</title>
+  
   <!-- Bootstrap CDN -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
   <!-- Font Awesome -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+  <!-- Prism.js for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
   <style>
     body {
       font-family: "Poppins", sans-serif;
@@ -75,7 +81,7 @@
       padding: 0 20px;
     }
     .btn-custom {
-      width: 120px;
+      width: 130px;
       font-weight: 600;
       border-radius: 30px;
     }
@@ -83,17 +89,18 @@
 </head>
 <body>
 
-<div class="main-heading">
-  <h1><i class="fas fa-key"></i> Token-Based Calculator API</h1>
-</div>
+  <header class="main-heading">
+    <h1><i class="fas fa-key"></i> Token-Based Calculator API</h1>
+  </header>
 
-<div class="card card-prob">
+  <main>
+    <div class="card card-prob">
 
-  <h3 class="section-title"><i class="fas fa-tasks icon"></i>Assignment</h3>
-  <p>Develop a basic calculator API endpoint that performs arithmetic operations. Access to this endpoint must be restricted via user authorization. Instead of relying on traditional username and password authentication, implement token-based authorization to enhance security and scalability.</p>
+      <h3 class="section-title"><i class="fas fa-tasks icon"></i> Assignment</h3>
+      <p>Develop a basic calculator API endpoint that performs arithmetic operations. Access to this endpoint must be restricted via user authorization. Instead of relying on traditional username and password authentication, implement token-based authorization to enhance security and scalability.</p>
 
-  <h3 class="section-title"><i class="fas fa-code icon"></i>Python Code</h3>
-  <pre><code>from fastapi import FastAPI, HTTPException, Depends
+      <h3 class="section-title"><i class="fas fa-code icon"></i> Python Code</h3>
+      <pre><code class="language-python">from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -173,8 +180,8 @@ if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
 </code></pre>
 
-  <h3 class="section-title"><i class="fas fa-cogs icon"></i>Sample Output</h3>
-  <pre><code>POST /login
+      <h3 class="section-title"><i class="fas fa-cogs icon"></i> Sample Output</h3>
+      <pre><code class="language-json">POST /login
 form data: username=Bhargav, password=any
 → {"access_token": "...", "token_type": "bearer"}
 
@@ -183,32 +190,30 @@ Headers: Authorization: Bearer &lt;token&gt;
 Body: { "a": 10, "b": 5, "operation": "add" }
 → {"user": "Bhargav", "result": 15.0 }</code></pre>
 
-  <h3 class="section-title"><i class="fas fa-info-circle icon"></i>Explanation</h3>
-  <ul>
-    <li><strong>JWT Token:</strong> Short-lived tokens (15 mins) are generated after login.</li>
-    <li><strong>OAuth2PasswordRequestForm:</strong> Simulates a form-based login with username/password.</li>
-    <li><strong>HTTPBearer:</strong> Used to extract and validate token from the request header.</li>
-    <li><strong>/calculate:</strong> Only accessible with valid token. Supports add, sub, mul, div operations.</li>
-    <li><strong>verify_token():</strong> Validates JWT signature and expiration.</li>
-  </ul>
+      <h3 class="section-title"><i class="fas fa-info-circle icon"></i> Explanation</h3>
+      <ul>
+        <li><strong>JWT Token:</strong> Short-lived tokens (15 mins) are generated after login.</li>
+        <li><strong>OAuth2PasswordRequestForm:</strong> Simulates a form-based login with username/password.</li>
+        <li><strong>HTTPBearer:</strong> Used to extract and validate token from the request header.</li>
+        <li><strong>/calculate:</strong> Only accessible with valid token. Supports add, sub, mul, div operations.</li>
+        <li><strong>verify_token():</strong> Validates JWT signature and expiration.</li>
+      </ul>
 
-  <div class="note-box">
-    <h5><i class="fas fa-lock icon"></i>Why Token-Based Authentication?</h5>
-    <ul>
-      <li>🔐 More secure than keeping credentials in every request.</li>
-      <li>🧩 Stateless: No session data stored on server.</li>
-      <li>⏱️ Expirable: Tokens can expire and be refreshed securely.</li>
-      <li>🌐 Scalable: Easy to use across multiple APIs or microservices.</li>
-    </ul>
-  </div>
+      <div class="note-box">
+        <h5><i class="fas fa-lock icon"></i> Why Token-Based Authentication?</h5>
+        <ul>
+          <li>🔐 More secure than keeping credentials in every request.</li>
+          <li>🧩 Stateless: No session data stored on server.</li>
+          <li>⏱️ Expirable: Tokens can expire and be refreshed securely.</li>
+          <li>🌐 Scalable: Easy to use across multiple APIs or microservices.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
 
-</div>
-
-
-<div class="footer">
-  &copy; 2025 API Security Assignment • Designed with ❤️
-</div>
+  <footer class="footer">
+    &copy; 2025 API Security Assignment • Designed with ❤️
+  </footer>
 
 </body>
 </html>
-
